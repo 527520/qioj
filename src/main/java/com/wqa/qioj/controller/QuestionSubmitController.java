@@ -71,6 +71,7 @@ public class QuestionSubmitController {
                 questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
         // 返回脱敏信息
         final User loginUser = userService.getLoginUser(request);
+
         return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(questionSubmitPage, loginUser));
     }
 
