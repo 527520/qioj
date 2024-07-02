@@ -1,19 +1,6 @@
-# SpringBoot 项目初始模板
-
-> 作者：[程序员鱼皮](https://github.com/li)
-> 仅分享于 [编程导航知识星球](https://.icu)
-
-基于 Java SpringBoot 的项目初始模板，整合了常用框架和主流业务的示例代码。
-
-只需 1 分钟即可完成内容网站的后端！！！大家还可以在此基础上快速开发自己的项目。
-
-[toc]
-
-## 模板特点
-
 ### 主流框架 & 特性
 
-- Spring Boot 2.7.x（贼新）
+- Spring Boot 2.7.x
 - Spring MVC
 - MyBatis + MyBatis Plus 数据访问（开启分页）
 - Spring Boot 调试工具和项目处理器
@@ -74,7 +61,7 @@
 
 ## 快速上手
 
-> 所有需要修改的地方鱼皮都标记了 `todo`，便于大家找到修改的位置~
+> 所有需要修改的地方都标记了 `todo`，便于找到修改的位置~
 
 ### MySQL 数据库
 
