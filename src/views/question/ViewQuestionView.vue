@@ -5,26 +5,26 @@
       <a-col :md="12" :xs="24">
         <a-tabs default-active-key="question">
           <a-tab-pane key="question" title="题目">
-            <a-card v-if="qusetion" :title="qusetion.title">
+            <a-card v-if="question" :title="question.title">
               <a-descriptions
                 title="判题条件"
                 :column="{ xs: 1, md: 2, lg: 3 }"
               >
                 <a-descriptions-item label="时间限制">
-                  {{ qusetion.judgeConfig.timeLimit ?? 0 }}
+                  {{ question.judgeConfig.timeLimit ?? 0 }}
                 </a-descriptions-item>
                 <a-descriptions-item label="内存限制">
-                  {{ qusetion.judgeConfig.memoryLimit ?? 0 }}
+                  {{ question.judgeConfig.memoryLimit ?? 0 }}
                 </a-descriptions-item>
                 <a-descriptions-item label="堆栈限制">
-                  {{ qusetion.judgeConfig.stackLimit ?? 0 }}
+                  {{ question.judgeConfig.stackLimit ?? 0 }}
                 </a-descriptions-item>
               </a-descriptions>
-              <MdViewer :value="qusetion.content || ''" />
+              <MdViewer :value="question.content || ''" />
               <template #extra>
                 <a-space wrap>
                   <a-tag
-                    v-for="(tag, index) of qusetion.tags"
+                    v-for="(tag, index) of question.tags"
                     :key="index"
                     color="green"
                     >{{ tag }}
@@ -60,7 +60,7 @@
         <CodeEditor
           :value="form.code as string"
           :language="form.language"
-          @handle-change="changeCode"
+          :handle-change="changeCode"
         />
         <a-divider size="0" />
         <a-button type="primary" style="min-width: 200px" @click="doSubmit">
@@ -91,14 +91,14 @@ const props = withDefaults(defineProps<Props>(), {
   id: () => "",
 });
 
-const qusetion = ref<QuestionVO>();
+const question = ref<QuestionVO>();
 
 const loadData = async () => {
   const res = await QuestionControllerService.getQuestionVoByIdUsingGet(
     props.id as any
   );
   if (res.code === 0) {
-    qusetion.value = res.data;
+    question.value = res.data;
   } else {
     message.error("加载失败，错误信息：" + res.message);
   }
@@ -112,9 +112,13 @@ const form = ref<QuestionSubmitAddRequest>({
  * 提交代码
  */
 const doSubmit = async () => {
-  const res = await QuestionSubmitControllerService.doQuestionSubmitUsingPost(
-    form.value
-  );
+  if (!question.value?.id) {
+    return;
+  }
+  const res = await QuestionSubmitControllerService.doQuestionSubmitUsingPost({
+    ...form.value,
+    questionId: question.value?.id,
+  });
   if (res.code === 0) {
     message.success("提交成功！");
   } else {
