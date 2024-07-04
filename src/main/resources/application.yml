@@ -1,0 +1,7 @@
+spring:
+  application:
+    name:
+      qioj-code-sandbox
+
+server:
+  port: 8081
