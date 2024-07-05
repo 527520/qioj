@@ -58,15 +58,15 @@ public class JavaNativeCodeSandBox implements CodeSandBox {
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
         // 安全管理器-限制权限
-//        System.setSecurityManager(new MySecurityManager());
+        System.setSecurityManager(new MySecurityManager());
 
         String code = executeCodeRequest.getCode();
         // 校验代码是否包含黑名单中的命令
-//        FoundWord foundWord = WORD_TREE.matchWord(code);
-//        if (foundWord != null && StrUtil.isNotBlank(foundWord.getFoundWord())) {
-//            System.out.println("敏感词：" + foundWord.getFoundWord());
-//            return null;
-//        }
+        FoundWord foundWord = WORD_TREE.matchWord(code);
+        if (foundWord != null && StrUtil.isNotBlank(foundWord.getFoundWord())) {
+            System.out.println("敏感词：" + foundWord.getFoundWord());
+            return null;
+        }
 
         // 1) 把用户的代码保存为文件
         String language = executeCodeRequest.getLanguage();
