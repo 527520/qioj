@@ -10,7 +10,7 @@ import com.wqa.qioj.judge.codesandbox.model.ExecuteCodeRequest;
 import com.wqa.qioj.judge.codesandbox.model.ExecuteCodeResponse;
 import com.wqa.qioj.judge.strategy.JudgeContext;
 import com.wqa.qioj.model.dto.question.JudgeCase;
-import com.wqa.qioj.model.dto.questionsubmit.JudgeInfo;
+import com.wqa.qioj.judge.codesandbox.model.JudgeInfo;
 import com.wqa.qioj.model.entity.Question;
 import com.wqa.qioj.model.entity.QuestionSubmit;
 import com.wqa.qioj.model.enums.QuestionSubmitStatusEnum;

@@ -3,7 +3,7 @@ package com.wqa.qioj.judge.strategy;
 import cn.hutool.json.JSONUtil;
 import com.wqa.qioj.model.dto.question.JudgeCase;
 import com.wqa.qioj.model.dto.question.JudgeConfig;
-import com.wqa.qioj.model.dto.questionsubmit.JudgeInfo;
+import com.wqa.qioj.judge.codesandbox.model.JudgeInfo;
 import com.wqa.qioj.model.entity.Question;
 import com.wqa.qioj.model.enums.JudgeInfoMessageEnum;
 

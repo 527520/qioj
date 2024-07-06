@@ -1,7 +1,7 @@
 package com.wqa.qioj.model.vo;
 
 import cn.hutool.json.JSONUtil;
-import com.wqa.qioj.model.dto.questionsubmit.JudgeInfo;
+import com.wqa.qioj.judge.codesandbox.model.JudgeInfo;
 import com.wqa.qioj.model.entity.QuestionSubmit;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;

@@ -3,8 +3,7 @@ package com.wqa.qioj.judge.codesandbox.impl;
 import com.wqa.qioj.judge.codesandbox.CodeSandBox;
 import com.wqa.qioj.judge.codesandbox.model.ExecuteCodeRequest;
 import com.wqa.qioj.judge.codesandbox.model.ExecuteCodeResponse;
-import com.wqa.qioj.model.dto.questionsubmit.JudgeInfo;
-import com.wqa.qioj.model.entity.QuestionSubmit;
+import com.wqa.qioj.judge.codesandbox.model.JudgeInfo;
 import com.wqa.qioj.model.enums.JudgeInfoMessageEnum;
 import com.wqa.qioj.model.enums.QuestionSubmitStatusEnum;
 

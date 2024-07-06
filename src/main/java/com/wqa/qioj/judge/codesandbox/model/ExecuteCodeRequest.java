@@ -1,7 +1,5 @@
 package com.wqa.qioj.judge.codesandbox.model;
 
-import com.wqa.qioj.model.dto.question.JudgeConfig;
-import com.wqa.qioj.model.dto.questionsubmit.JudgeInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

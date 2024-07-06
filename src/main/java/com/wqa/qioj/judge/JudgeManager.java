@@ -4,7 +4,7 @@ import com.wqa.qioj.judge.strategy.DefaultJudgeStrategyImpl;
 import com.wqa.qioj.judge.strategy.JavaLanguageJudgeStrategyImpl;
 import com.wqa.qioj.judge.strategy.JudgeContext;
 import com.wqa.qioj.judge.strategy.JudgeStrategy;
-import com.wqa.qioj.model.dto.questionsubmit.JudgeInfo;
+import com.wqa.qioj.judge.codesandbox.model.JudgeInfo;
 import org.springframework.stereotype.Service;
 
 /**

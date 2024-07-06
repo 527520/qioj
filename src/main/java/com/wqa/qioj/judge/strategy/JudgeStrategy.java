@@ -1,6 +1,6 @@
 package com.wqa.qioj.judge.strategy;
 
-import com.wqa.qioj.model.dto.questionsubmit.JudgeInfo;
+import com.wqa.qioj.judge.codesandbox.model.JudgeInfo;
 
 /**
  * 判题策略（策略模式）
