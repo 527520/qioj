@@ -2,8 +2,7 @@ package com.wqa.qioj.esdao;
 
 import com.wqa.qioj.model.dto.post.PostEsDTO;
 import com.wqa.qioj.model.dto.post.PostQueryRequest;
-import com.wqa.qioj.model.entity.Post;
-import com.wqa.qioj.service.PostService;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;

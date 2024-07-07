@@ -1,6 +1,5 @@
 package com.wqa.qioj.mapper;
 
-import com.wqa.qioj.model.entity.Post;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Resource;
