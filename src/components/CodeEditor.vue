@@ -43,20 +43,12 @@ const codeEditor = ref();
 watch(
   () => props.language,
   () => {
-    codeEditor.value = moncao.editor.create(codeEditorRef.value, {
-      value: props.value,
-      language: props.language,
-      automaticLayout: true,
-      lineNumbers: "on",
-      roundedSelection: false,
-      scrollBeyondLastLine: false,
-      readOnly: false,
-      theme: "vs-dark",
-      minimap: {
-        enabled: true,
-      },
-      colorDecorators: true,
-    });
+    if (codeEditor.value) {
+      moncao.editor.setModelLanguage(
+        toRaw(codeEditor.value).getModel(),
+        props.language
+      );
+    }
   }
 );
 
