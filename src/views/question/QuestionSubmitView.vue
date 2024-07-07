@@ -24,7 +24,7 @@
     <a-divider size="0" />
     <a-table
       :ref="tableRef"
-      :columns="columns"
+      :columns="columns as any"
       :data="dataList"
       :scroll="scroll"
       :pagination="{
