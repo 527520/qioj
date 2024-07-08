@@ -36,6 +36,11 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+  rabbitmq:
+    host: localhost
+    port: 5672
+    password: guest
+    username: guest
 server:
   address: 0.0.0.0
   port: 8114
@@ -45,6 +50,7 @@ server:
     session:
       cookie:
         max-age: 2592000
+        path: /api
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
@@ -57,3 +63,5 @@ mybatis-plus:
 # 代码沙箱配置
 codesandbox:
   type: remote
+knife4j:
+  enable: true

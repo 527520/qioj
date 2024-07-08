@@ -1,5 +1,37 @@
 spring:
+  application:
+    name: qioj-backend-gateway
   cloud:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+    gateway:
+      routes:
+        - id: qioj-backend-user-service
+          uri: lb://qioj-backend-user-service
+          predicates:
+            - Path=/api/user/**
+        - id: qioj-backend-question-service
+          uri: lb://qioj-backend-question-service
+          predicates:
+            - Path=/api/question/**
+        - id: qioj-backend-judge-service
+          uri: lb://qioj-backend-judge-service
+          predicates:
+            - Path=/api/judge/**
+  main:
+    web-application-type: reactive
+server:
+  port: 8101
+# 开启聚合文档配置
+knife4j:
+  # 开启gateway聚合组件
+  gateway:
+    enabled: true
+    # 开启discover模式
+    strategy: discover
+    discover:
+      # 开启discover模式
+      enabled: true
+      # 聚合子服务全部swagger2规范文档
+      version: swagger2

@@ -15,6 +15,7 @@ import com.wqa.qiojbackendmodel.model.entity.User;
 import com.wqa.qiojbackendmodel.model.enums.QuestionSubmitLanguageEnum;
 import com.wqa.qiojbackendmodel.model.enums.QuestionSubmitStatusEnum;
 import com.wqa.qiojbackendmodel.model.vo.QuestionSubmitVO;
+import com.wqa.qiojbackendquestionservice.rabbitmq.MyMessageProducer;
 import com.wqa.qiojbackendquestionservice.service.QuestionService;
 import com.wqa.qiojbackendquestionservice.service.QuestionSubmitService;
 import com.wqa.qiojbackendserviceclient.service.JudgeFeignClient;
@@ -50,6 +51,9 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
     @Resource
     @Lazy
     private JudgeFeignClient judgeFeignClient;
+
+    @Resource
+    private MyMessageProducer myMessageProducer;
 
     /**
      * 提交题目
@@ -89,9 +93,11 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         }
         Long questionSubmitId = questionSubmit.getId();
         // 执行判题服务
-        CompletableFuture.runAsync(() -> {
-            judgeFeignClient.doJudge(questionSubmitId);
-        });
+        // 向rabbitmq发送消息
+        myMessageProducer.sendMessage("code_exchange", "my_routingKey", String.valueOf(questionSubmitId));
+//        CompletableFuture.runAsync(() -> {
+//            judgeFeignClient.doJudge(questionSubmitId);
+//        });
         return questionSubmitId;
     }
 
