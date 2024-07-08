@@ -15,7 +15,7 @@ import com.wqa.qiojbackendmodel.model.vo.QuestionVO;
 import com.wqa.qiojbackendmodel.model.vo.UserVO;
 import com.wqa.qiojbackendquestionservice.mapper.QuestionMapper;
 import com.wqa.qiojbackendquestionservice.service.QuestionService;
-import com.wqa.qiojbackendserviceclient.service.UserService;
+import com.wqa.qiojbackendserviceclient.service.UserFeignClient;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * @author lenovo
+ * @author wuqian
  * @description 针对表【question(题目)】的数据库操作Service实现
  * @createDate 2023-11-13 11:25:43
  */
@@ -38,7 +38,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         implements QuestionService {
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
     /**
      * 校验题目是否合法
@@ -124,9 +124,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         Long userId = question.getUserId();
         User user = null;
         if (userId != null && userId > 0) {
-            user = userService.getById(userId);
+            user = userFeignClient.getById(userId);
         }
-        UserVO userVO = userService.getUserVO(user);
+        UserVO userVO = userFeignClient.getUserVO(user);
         questionVO.setUserVO(userVO);
         return questionVO;
     }
@@ -140,7 +140,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         }
         // 1. 关联查询用户信息
         Set<Long> userIdSet = questionList.stream().map(Question::getUserId).collect(Collectors.toSet());
-        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
+        Map<Long, List<User>> userIdUserListMap = userFeignClient.listByIds(userIdSet).stream()
                 .collect(Collectors.groupingBy(User::getId));
         // 填充信息
         List<QuestionVO> questionVOList = questionList.stream().map(question -> {
@@ -150,7 +150,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
-            questionVO.setUserVO(userService.getUserVO(user));
+            questionVO.setUserVO(userFeignClient.getUserVO(user));
             return questionVO;
         }).collect(Collectors.toList());
         questionVOPage.setRecords(questionVOList);

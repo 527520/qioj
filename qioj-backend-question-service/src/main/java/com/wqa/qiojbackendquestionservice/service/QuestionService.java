@@ -10,7 +10,7 @@ import com.wqa.qiojbackendmodel.model.vo.QuestionVO;
 import javax.servlet.http.HttpServletRequest;
 
 /**
-* @author lenovo
+* @author wuqian
 * @description 针对表【question(题目)】的数据库操作Service
 * @createDate 2023-11-13 11:25:43
 */
