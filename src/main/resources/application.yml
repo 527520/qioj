@@ -5,3 +5,7 @@ spring:
 
 server:
   port: 8081
+
+# 更改代码沙箱类型 docker | native
+codeSandBox:
+  type: native

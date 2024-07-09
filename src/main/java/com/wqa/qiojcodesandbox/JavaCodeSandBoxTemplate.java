@@ -13,6 +13,7 @@ import com.wqa.qiojcodesandbox.model.JudgeInfo;
 import com.wqa.qiojcodesandbox.security.MySecurityManager;
 import com.wqa.qiojcodesandbox.utils.ProcessUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import java.util.List;
  * Java代码沙箱模板方法实现
  */
 @Slf4j
+@Component
 public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
 
     public static final String GLOBAL_CODE_DIR_NAME = "tempCode";
@@ -33,10 +35,20 @@ public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
 
     public static final String SECURITY_MANAGER_PATH = "D:\\procedure_wqa\\qioj-code-sandbox\\src\\main\\resources\\security";
 
+    public static final List<String> blackList = Arrays.asList("Files", "Process", "Runtime");
+
     /**
      * 超时时间 5s
      */
     public static final long TIME_OUT = 5000L;
+
+    public static final WordTree WORD_TREE;
+
+    static {
+        // 初始化字典树
+        WORD_TREE = new WordTree();
+        WORD_TREE.addWords(blackList);
+    }
 
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
@@ -44,6 +56,14 @@ public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
 //        System.setSecurityManager(new MySecurityManager());
 
         String code = executeCodeRequest.getCode();
+
+        // 校验代码是否包含黑名单中的命令
+        FoundWord foundWord = WORD_TREE.matchWord(code);
+        if (foundWord != null && StrUtil.isNotBlank(foundWord.getFoundWord())) {
+            System.out.println("敏感词：" + foundWord.getFoundWord());
+            return null;
+        }
+
         String language = executeCodeRequest.getLanguage();
         List<String> inputList = executeCodeRequest.getInputList();
 
@@ -129,8 +149,8 @@ public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
             for (String inputArgs : inputList) {
 //                String runCmd = String.format("java -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
                 // -Xmx 最大堆内存大小 -Xms初始堆内存大小
-//                String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
-                String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s;%s -Djava.security.manager=MySecurityManager Main %s", userCodeParentPath, SECURITY_MANAGER_PATH, inputArgs);
+                String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
+//                String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s;%s -Djava.security.manager=MySecurityManager Main %s", userCodeParentPath, SECURITY_MANAGER_PATH, inputArgs);
                 Process runProcess = Runtime.getRuntime().exec(runCmd); // 其实是开了一个子进程
                 // 超时控制
                 new Thread(() -> {
@@ -183,10 +203,10 @@ public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
         }
         executeCodeResponse.setOutputList(outputList);
         // 正常运行完成
-//        if (outputList.size() == executeMessageList.size()) {
-//            executeCodeResponse.setStatus(1);
-//        }
-        executeCodeResponse.setStatus(executeCodeResponse.getStatus() != 3 ? 1 : 3);
+        if (outputList.size() == executeMessageList.size()) {
+            executeCodeResponse.setStatus(1);
+        }
+//        executeCodeResponse.setStatus(executeCodeResponse.getStatus() != 3 ? 1 : 3);
         JudgeInfo judgeInfo = new JudgeInfo();
         // 要使用第三方库，执行控制台命令（stackList），解析结果，非常麻烦，不做实现
         judgeInfo.setMemory(maxMemory);

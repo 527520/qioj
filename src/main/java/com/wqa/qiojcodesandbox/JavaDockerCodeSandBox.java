@@ -11,6 +11,7 @@ import com.github.dockerjava.core.command.ExecStartResultCallback;
 import com.wqa.qiojcodesandbox.model.ExecuteCodeRequest;
 import com.wqa.qiojcodesandbox.model.ExecuteCodeResponse;
 import com.wqa.qiojcodesandbox.model.ExecuteMessage;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
 import java.io.Closeable;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@Component
 public class JavaDockerCodeSandBox extends JavaCodeSandBoxTemplate {
 
     public static Boolean firstInit = true;

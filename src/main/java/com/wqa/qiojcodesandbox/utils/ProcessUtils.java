@@ -2,9 +2,12 @@ package com.wqa.qiojcodesandbox.utils;
 
 import cn.hutool.core.util.StrUtil;
 import com.wqa.qiojcodesandbox.model.ExecuteMessage;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.StopWatch;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProcessUtils {
 
@@ -29,34 +32,33 @@ public class ProcessUtils {
                 System.out.println(opName + "成功");
                 // 分批获取进程的输出
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                StringBuilder compileOutputStringBuilder = new StringBuilder();
+                List<String> outputStrList = new ArrayList<>();
                 String compileOutputLine;
                 // 逐行读取
                 while ((compileOutputLine = bufferedReader.readLine()) != null) {
-                    compileOutputStringBuilder.append(compileOutputLine).append("\n");
+                    outputStrList.add(compileOutputLine);
                 }
-                executeMessage.setMessage(compileOutputStringBuilder.toString());
+                executeMessage.setMessage(StringUtils.join(outputStrList, "\n"));
             } else { // 异常退出
                 System.out.println(opName + "失败：" + exitValue);
                 // 分批获取进程的正常输出
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                StringBuilder compileOutputStringBuilder = new StringBuilder();
+                List<String> compileOutputStrList = new ArrayList<>();
                 String compileOutputLine;
                 // 逐行读取
                 while ((compileOutputLine = bufferedReader.readLine()) != null) {
-                    compileOutputStringBuilder.append(compileOutputLine).append("\n");
+                    compileOutputStrList.add(compileOutputLine);
                 }
-                executeMessage.setMessage(compileOutputStringBuilder.toString());
+                executeMessage.setMessage(StringUtils.join(compileOutputStrList, "\n"));
 
                 // 分批获取进程的错误输出
                 BufferedReader errorBufferedReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                StringBuilder errorCompileOutputStringBuilder = new StringBuilder();
-                String errorCompileOutputLine;
+                List<String> errorCompileOutputStrList = new ArrayList<>();                String errorCompileOutputLine;
                 // 逐行读取
                 while ((errorCompileOutputLine = errorBufferedReader.readLine()) != null) {
-                    errorCompileOutputStringBuilder.append(errorCompileOutputLine);
+                    errorCompileOutputStrList.add(errorCompileOutputLine);
                 }
-                executeMessage.setErrorMessage(errorCompileOutputStringBuilder.toString());
+                executeMessage.setErrorMessage(StringUtils.join(errorCompileOutputStrList, "\n"));
             }
             stopWatch.stop();
             executeMessage.setTime(stopWatch.getLastTaskTimeMillis());
