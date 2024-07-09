@@ -6,7 +6,6 @@ import com.wqa.qioj.common.ErrorCode;
 import com.wqa.qioj.common.ResultUtils;
 import com.wqa.qioj.constant.FileConstant;
 import com.wqa.qioj.exception.BusinessException;
-import com.wqa.qioj.manager.CosManager;
 import com.wqa.qioj.model.dto.file.UploadFileRequest;
 import com.wqa.qioj.model.entity.User;
 import com.wqa.qioj.model.enums.FileUploadBizEnum;
@@ -35,9 +34,6 @@ public class FileController {
     @Resource
     private UserService userService;
 
-    @Resource
-    private CosManager cosManager;
-
     /**
      * 文件上传
      *
@@ -65,7 +61,6 @@ public class FileController {
             // 上传文件
             file = File.createTempFile(filepath, null);
             multipartFile.transferTo(file);
-            cosManager.putObject(filepath, file);
             // 返回可访问地址
             return ResultUtils.success(FileConstant.COS_HOST + filepath);
         } catch (Exception e) {
