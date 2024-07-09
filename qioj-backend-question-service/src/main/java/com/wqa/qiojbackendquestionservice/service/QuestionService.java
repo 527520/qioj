@@ -50,4 +50,5 @@ public interface QuestionService extends IService<Question> {
      */
     Page<QuestionVO> getQuestionVOPage(Page<Question> questionPage, HttpServletRequest request);
 
+    boolean updateSubmitNum(long questionId);
 }

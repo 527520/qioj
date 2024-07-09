@@ -1,4 +1,5 @@
 package com.wqa.qiojbackendquestionservice.mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.wqa.qiojbackendmodel.model.entity.Question;
@@ -10,6 +11,8 @@ import com.wqa.qiojbackendmodel.model.entity.Question;
 * @Entity com.wqa.qioj.model.entity.Question
 */
 public interface QuestionMapper extends BaseMapper<Question> {
+
+    int updateSubmitNumById( @Param("id") Long id);
 
 }
 

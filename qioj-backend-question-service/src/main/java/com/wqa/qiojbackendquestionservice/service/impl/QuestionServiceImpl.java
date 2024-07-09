@@ -40,6 +40,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
     @Resource
     private UserFeignClient userFeignClient;
 
+    @Resource
+    private QuestionMapper questionMapper;
+
     /**
      * 校验题目是否合法
      * @param question
@@ -157,6 +160,10 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         return questionVOPage;
     }
 
+    @Override
+    public boolean updateSubmitNum(long questionId) {
+        return questionMapper.updateSubmitNumById(questionId) > 0;
+    }
 }
 
 
