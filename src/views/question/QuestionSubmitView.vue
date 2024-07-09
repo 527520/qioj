@@ -54,7 +54,6 @@ import {
 } from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
-import moment from "moment";
 
 const tableRef = ref();
 const dataList = ref([]);
@@ -78,7 +77,7 @@ const loadData = async () => {
 const searchParams = ref<QuestionSubmitQueryRequest>({
   questionId: undefined,
   language: undefined,
-  pageSize: 5,
+  pageSize: 7,
   current: 1,
 });
 /**

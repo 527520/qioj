@@ -43,11 +43,7 @@
         </a-space>
       </template>
       <template #acceptedRate="{ record }">
-        {{
-          `${
-            record.submitNum ? record.acceptedNum / record.submitNum : "0"
-          }% (${record.acceptedNum}/${record.submitNum})`
-        }}
+        {{ calculationPassRate(record.submitNum, record.acceptedNum) }}
       </template>
       <template #createTime="{ record }">
         {{ moment(record.createTime).format("YYYY-MM-DD") }}
@@ -163,6 +159,20 @@ const doSubmit = () => {
   };
   // searchParams的值在上面已经改变，会自动执行watchEffect重新加载数据,所以下面不用执行loadData
   // loadData();
+};
+
+const calculationPassRate = (submitNum: number, acceptedNum: number) => {
+  if (submitNum === 0) {
+    return "0%(" + acceptedNum + "/" + submitNum + ")";
+  }
+  return (
+    (((acceptedNum / submitNum) * 100) | 0) +
+    "%(" +
+    acceptedNum +
+    "/" +
+    submitNum +
+    ")"
+  );
 };
 </script>
 
