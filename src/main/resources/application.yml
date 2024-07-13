@@ -8,4 +8,4 @@ server:
 
 # 更改代码沙箱类型 docker | native
 codeSandBox:
-  type: native
+  type: docker

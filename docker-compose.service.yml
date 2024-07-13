@@ -1,0 +1,14 @@
+version: '3'
+services:
+  qioj-code-sandbox:
+    container_name: qioj-code-sandbox
+    build: # 服务的 Docker 构建文件位置
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    networks:
+      - mynetwork
+networks:
+  mynetwork:
+    driver: bridge
