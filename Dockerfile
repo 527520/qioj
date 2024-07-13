@@ -1,15 +1,12 @@
-# Docker 镜像构建
-# @author <a href="https://github.com/li">程序员鱼皮</a>
-# @from <a href="https://.icu">编程导航知识星球</a>
-FROM maven:3.8.1-jdk-8-slim as builder
-
-# Copy local code to the container image.
+# 基础镜像
+FROM openjdk:8-jdk-alpine
+# 指定工作目录
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src
-
-# Build a release artifact.
-RUN mvn package -DskipTests
-
-# Run the web service on container startup.
-CMD ["java","-jar","/app/target/qioj-backend-0.0.1-SNAPSHOT.jar","--spring.profiles.active=prod"]
+# 将jar包添加到工作目录
+ADD target/qioj-backend-0.0.1-SNAPSHOT.jar .
+# 设置 JVM 内存参数
+# ENV JAVA_OPTS="-Xms128m -Xmx256m"
+# 暴露端口号
+EXPOSE 8101
+# 启动命令
+ENTRYPOINT ["java","-jar","/app/qioj-backend-0.0.1-SNAPSHOT.jar","--spring.profiles.active=prod"]

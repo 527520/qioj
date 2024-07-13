@@ -2,6 +2,7 @@ package com.wqa.qioj.mapper;
 
 import com.wqa.qioj.model.entity.Question;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
 * @author lenovo
@@ -10,6 +11,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @Entity com.wqa.qioj.model.entity.Question
 */
 public interface QuestionMapper extends BaseMapper<Question> {
+
+    int updateSubmitNumById( @Param("id") Long id);
 
 }
 

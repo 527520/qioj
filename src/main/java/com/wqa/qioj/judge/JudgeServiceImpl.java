@@ -13,6 +13,7 @@ import com.wqa.qioj.model.dto.question.JudgeCase;
 import com.wqa.qioj.judge.codesandbox.model.JudgeInfo;
 import com.wqa.qioj.model.entity.Question;
 import com.wqa.qioj.model.entity.QuestionSubmit;
+import com.wqa.qioj.model.enums.JudgeInfoMessageEnum;
 import com.wqa.qioj.model.enums.QuestionSubmitStatusEnum;
 import com.wqa.qioj.service.QuestionService;
 import com.wqa.qioj.service.QuestionSubmitService;
@@ -96,6 +97,15 @@ public class JudgeServiceImpl implements JudgeService {
         questionSubmitUpdate.setStatus(QuestionSubmitStatusEnum.SUCCEED.getValue());
         questionSubmitUpdate.setJudgeInfo(JSONUtil.toJsonStr(judgeInfo));
         result = questionSubmitService.updateById(questionSubmitUpdate);
+
+        // 7) 修改数据库中的成功数
+        if (JudgeInfoMessageEnum.ACCEPTED.getValue().equals(judgeInfo.getMessage())) {
+            // 表示成功
+            Question question1 = new Question();
+            question1.setId(questionId);
+            question1.setAcceptedNum(question.getAcceptedNum() + 1);
+            result = questionService.updateQuestionById(question1);
+        }
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "判题状态更新错误");
         }

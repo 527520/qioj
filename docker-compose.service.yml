@@ -1,0 +1,14 @@
+version: '3'
+services:
+  qioj-backend:
+    container_name: qioj-backend
+    build: # 服务的 Docker 构建文件位置
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8101:8101"
+    networks:
+      - mynetwork
+networks:
+  mynetwork:
+    driver: bridge

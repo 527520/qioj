@@ -19,6 +19,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -35,6 +38,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private QuestionMapper questionMapper;
 
     /**
      * 校验题目是否合法
@@ -153,6 +159,15 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         return questionVOPage;
     }
 
+    @Override
+    public boolean updateSubmitNum(long questionId) {
+        return questionMapper.updateSubmitNumById(questionId) > 0;
+    }
+
+    @Override
+    public boolean updateQuestionById(Question question) {
+        return this.updateById(question);
+    }
 }
 
 

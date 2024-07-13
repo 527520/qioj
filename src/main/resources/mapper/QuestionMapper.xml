@@ -29,4 +29,10 @@
         thumbNum,favourNum,userId,
         createTime,updateTime,isDelete
     </sql>
+
+    <update id="updateSubmitNumById">
+        update question
+        set submitNum = submitNum + 1
+        where id = #{id,jdbcType=NUMERIC}
+    </update>
 </mapper>

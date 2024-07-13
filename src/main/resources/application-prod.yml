@@ -1,6 +1,4 @@
 # 线上配置文件
-# @author <a href="https://github.com/li">程序员鱼皮</a>
-# @from <a href="https://.icu">编程导航知识星球</a>
 server:
   port: 8101
 spring:
@@ -8,24 +6,23 @@ spring:
   # todo 需替换配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/my_db
+    url: jdbc:mysql://gz-cdb-ns8hvyw3.sql.tencentcdb.com:29720/qioj?useSSL=false&serverTimezone=GMT&characterEncoding=UTF-8
     username: root
-    password: 123456
+    password: wuqian2002@
   # Redis 配置
   # todo 需替换配置
   redis:
     database: 1
-    host: localhost
+    host: redis
     port: 6379
     timeout: 5000
-    password: 123456
-  # Elasticsearch 配置
-  # todo 需替换配置
-  elasticsearch:
-    uris: http://localhost:9200
-    username: root
-    password: 123456
+#    password: 123456
 mybatis-plus:
   configuration:
     # 生产环境关闭日志
     log-impl: ''
+# 代码沙箱配置
+codesandbox:
+  type: remote
+  remote:
+    host: 114.55.101.17
