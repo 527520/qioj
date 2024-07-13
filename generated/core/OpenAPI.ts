@@ -20,7 +20,10 @@ export type OpenAPIConfig = {
 };
 
 export const OpenAPI: OpenAPIConfig = {
-  BASE: "http://localhost:8101",
+  BASE:
+    process.env.NODE_ENV === "production"
+      ? "http://114.55.101.17:8101"
+      : "http://localhost:8101",
   VERSION: "1.0",
   WITH_CREDENTIALS: true,
   CREDENTIALS: "include",

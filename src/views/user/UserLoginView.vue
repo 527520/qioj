@@ -21,6 +21,9 @@
       <a-form-item>
         <a-button type="primary" html-type="submit">登录</a-button>
       </a-form-item>
+      <a-form-item>
+        <a-button type="primary" @click="goRegister">前往注册</a-button>
+      </a-form-item>
     </a-form>
   </div>
 </template>
@@ -52,5 +55,11 @@ const handleSubmit = async () => {
   } else {
     message.error("登录失败," + res.message);
   }
+};
+
+const goRegister = () => {
+  router.push({
+    path: "/user/register",
+  });
 };
 </script>
