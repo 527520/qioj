@@ -32,19 +32,23 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watchEffect } from "vue";
-import { Question, QuestionControllerService } from "../../../generated";
+import {
+  Question,
+  QuestionControllerService,
+  QuestionVO,
+} from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
 
 const tableRef = ref();
-const dataList = ref([]);
+const dataList = ref([] as QuestionVO);
 const total = ref(0);
 const searchParams = ref({
   pageSize: 7,
   current: 1,
 });
 const loadData = async () => {
-  const res = await QuestionControllerService.listQuestionByPageUsingPost(
+  const res = await QuestionControllerService.listMyQuestionVoByPageUsingPost(
     searchParams.value
   );
   if (res.code === 0) {
@@ -68,7 +72,7 @@ onMounted(() => {
 });
 
 const scroll = {
-  x: 1900,
+  x: 1600,
 };
 
 const columns = [
@@ -98,13 +102,6 @@ const columns = [
     width: 150,
   },
   {
-    title: "答案",
-    dataIndex: "answer",
-    ellipsis: true,
-    tooltip: true,
-    width: 150,
-  },
-  {
     title: "提交数",
     dataIndex: "submitNum",
     width: 100,
@@ -113,11 +110,6 @@ const columns = [
     title: "通过数",
     dataIndex: "acceptedNum",
     width: 100,
-  },
-  {
-    title: "用户id",
-    dataIndex: "userId",
-    width: 190,
   },
   {
     title: "创建时间",

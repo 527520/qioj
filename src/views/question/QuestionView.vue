@@ -20,6 +20,7 @@
       :ref="tableRef"
       :columns="columns"
       :data="dataList"
+      :scroll="scroll"
       :pagination="{
         pageSize: searchParams.pageSize,
         current: searchParams.current,
@@ -96,22 +97,36 @@ onMounted(() => {
   loadData();
 });
 
+const scroll = {
+  x: 1200,
+};
+
 const columns = [
   {
     title: "题号",
     dataIndex: "id",
+    width: 250,
   },
   {
     title: "题目名称",
     dataIndex: "title",
+    ellipsis: true,
+    tooltip: true,
+    width: 160,
   },
   {
     title: "标签",
     slotName: "tags",
+    ellipsis: true,
+    tooltip: true,
+    width: 240,
   },
   {
     title: "通过率",
     slotName: "acceptedRate",
+    ellipsis: true,
+    tooltip: true,
+    width: 180,
   },
   // {
   //   title: "提交数",
@@ -124,9 +139,13 @@ const columns = [
   {
     title: "创建时间",
     slotName: "createTime",
+    width: 220,
   },
   {
+    title: "操作",
     slotName: "optional",
+    width: 150,
+    fixed: "right",
   },
 ];
 

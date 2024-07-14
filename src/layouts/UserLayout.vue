@@ -2,7 +2,7 @@
   <div id="userLayout">
     <a-layout style="min-height: 100vh">
       <a-layout-header class="header">
-        <a-space>
+        <a-space class="logoBox" @click="goIndex">
           <img src="@/assets/qiOJ.png" class="logo" />
           <div>奇 OJ</div>
         </a-space>
@@ -17,11 +17,21 @@
   </div>
   <!--  <router-view />-->
 </template>
+<script setup lang="ts">
+import { useRouter } from "vue-router";
 
+const router = useRouter();
+
+const goIndex = () => {
+  router.push({
+    path: "/",
+    replace: true,
+  });
+};
+</script>
 <style scoped>
 #userLayout {
-  //background-size: cover;
-  //background: url("@/assets/background.jpg") no-repeat fixed center center;
+  //background-size: cover; //background: url("@/assets/background.jpg") no-repeat fixed center center;
 }
 
 #userLayout .logo {
@@ -40,11 +50,11 @@
 }
 
 #userLayout .footer {
-  //background: #efefef; padding: 16px; position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  //background: #efefef; padding: 16px; position: sticky; bottom: 0; left: 0; right: 0;
   text-align: center;
 }
+
+.logoBox {
+  cursor: pointer;
+}
 </style>
-<script></script>

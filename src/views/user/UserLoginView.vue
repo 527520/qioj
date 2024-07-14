@@ -18,12 +18,18 @@
           allow-clear
         />
       </a-form-item>
-      <a-form-item>
-        <a-button type="primary" html-type="submit">登录</a-button>
-      </a-form-item>
-      <a-form-item>
-        <a-button type="primary" @click="goRegister">前往注册</a-button>
-      </a-form-item>
+      <a-row class="grid-demo" justify="start">
+        <a-col :span="11">
+          <a-form-item>
+            <a-button type="primary" html-type="submit">登录</a-button>
+          </a-form-item>
+        </a-col>
+        <a-col :span="11">
+          <a-form-item>
+            <a-button type="primary" @click="goRegister">前往注册</a-button>
+          </a-form-item>
+        </a-col>
+      </a-row>
     </a-form>
   </div>
 </template>
@@ -48,7 +54,7 @@ const handleSubmit = async () => {
   // 登陆成功，跳转到主页
   if (res.code === 0) {
     await store.dispatch("user/getLoginUser");
-    await router.push({
+    router.push({
       path: "/",
       replace: true,
     });
@@ -60,6 +66,7 @@ const handleSubmit = async () => {
 const goRegister = () => {
   router.push({
     path: "/user/register",
+    replace: true,
   });
 };
 </script>

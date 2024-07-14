@@ -11,7 +11,7 @@
           :style="{ padding: 0, marginRight: '38px' }"
           disabled
         >
-          <div class="title-bar">
+          <div class="title-bar" @click="goIndex">
             <img class="logo" src="../assets/qiOJ.png" />
             <div class="title">奇 OJ</div>
           </div>
@@ -22,9 +22,21 @@
       </a-menu>
     </a-col>
     <a-col flex="100px">
-      <div>
-        {{ store.state.user?.loginUser?.userName ?? "未登录" }}
-      </div>
+      <a-dropdown trigger="hover">
+        <a-button @click="userLogin" class="user">
+          {{ store.state.user?.loginUser?.userName ?? "未登录" }}
+        </a-button>
+        <template #content>
+          <a-doption
+            @click="logout"
+            v-if="
+              (store.state.user?.loginUser?.userRole ??
+                ACCESS_ENUM.NOT_LOGIN) !== ACCESS_ENUM.NOT_LOGIN
+            "
+            >退出登录
+          </a-doption>
+        </template>
+      </a-dropdown>
     </a-col>
   </a-row>
 </template>
@@ -36,6 +48,8 @@ import { computed, ref } from "vue";
 import { useStore } from "vuex";
 import checkAccess from "@/access/checkAccess";
 import ACCESS_ENUM from "@/access/accessEnum";
+import { UserControllerService } from "../../generated";
+import message from "@arco-design/web-vue/es/message";
 
 const router = useRouter();
 const store = useStore();
@@ -69,12 +83,43 @@ const doMenuClick = (key: string) => {
   });
 };
 
-setTimeout(() => {
-  store.dispatch("user/getLoginUser", {
-    userName: "吴奇安",
-    userRole: ACCESS_ENUM.ADMIN,
+const userLogin = () => {
+  if (
+    (store.state.user?.loginUser?.userRole ?? ACCESS_ENUM.NOT_LOGIN) ===
+    ACCESS_ENUM.NOT_LOGIN
+  ) {
+    router.push({
+      path: "/user/login",
+      replace: true,
+    });
+  } else {
+    alert(store.state.user?.loginUser?.userName);
+  }
+};
+
+const goIndex = () => {
+  router.push({
+    path: "/",
+    replace: true,
   });
-}, 3000);
+};
+
+const logout = async () => {
+  // 在这里执行退出登录的逻辑，例如清除用户登录状态等
+  const res = await UserControllerService.userLogoutUsingPost();
+  if (res.code === 0) {
+    // 退出登录成功
+    await store.dispatch("user/getLoginUser");
+    router.push({
+      path: "/",
+      replace: true,
+    });
+    console.log("退出登录");
+    location.reload();
+  } else {
+    message.error("登录失败," + res.message);
+  }
+};
 </script>
 
 <style scoped>
@@ -90,5 +135,13 @@ setTimeout(() => {
 .title {
   color: #134cbd;
   margin-left: 6px;
+}
+
+.user {
+  cursor: pointer;
+}
+
+.title-bar {
+  cursor: pointer;
 }
 </style>
