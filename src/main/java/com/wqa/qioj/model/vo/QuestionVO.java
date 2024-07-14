@@ -57,6 +57,11 @@ public class QuestionVO implements Serializable {
     private JudgeConfig judgeConfig;
 
     /**
+     * 判题用例(json数组)
+     */
+    private String judgeCase;
+
+    /**
      * 点赞数
      */
     private Integer thumbNum;

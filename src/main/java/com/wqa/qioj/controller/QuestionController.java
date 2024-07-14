@@ -16,6 +16,7 @@ import com.wqa.qioj.model.dto.questionsubmit.QuestionSubmitQueryRequest;
 import com.wqa.qioj.model.entity.Question;
 import com.wqa.qioj.model.entity.QuestionSubmit;
 import com.wqa.qioj.model.entity.User;
+import com.wqa.qioj.model.enums.UserRoleEnum;
 import com.wqa.qioj.model.vo.QuestionSubmitVO;
 import com.wqa.qioj.model.vo.QuestionVO;
 import com.wqa.qioj.service.QuestionService;
@@ -113,14 +114,14 @@ public class QuestionController {
     }
 
     /**
-     * 更新（仅管理员）
+     * 更新（管理员或本人）
      *
      * @param questionUpdateRequest
      * @return
      */
     @PostMapping("/update")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> updateQuestion(@RequestBody QuestionUpdateRequest questionUpdateRequest) {
+    public BaseResponse<Boolean> updateQuestion(@RequestBody QuestionUpdateRequest questionUpdateRequest, HttpServletRequest request) {
+        User user = userService.getLoginUser(request);
         if (questionUpdateRequest == null || questionUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -140,10 +141,13 @@ public class QuestionController {
         }
         // 参数校验
         questionService.validQuestion(question, false);
-        long id = questionUpdateRequest.getId();
         // 判断是否存在
+        long id = questionUpdateRequest.getId();
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        if (!UserRoleEnum.ADMIN.getValue().equals(user.getUserRole()) && !oldQuestion.getUserId().equals(user.getId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限");
+        }
         boolean result = questionService.updateById(question);
         return ResultUtils.success(result);
     }
