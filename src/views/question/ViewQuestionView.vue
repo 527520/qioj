@@ -11,13 +11,13 @@
                 :column="{ xs: 1, md: 2, lg: 3 }"
               >
                 <a-descriptions-item label="时间限制">
-                  {{ question.judgeConfig.timeLimit ?? 0 }}
+                  {{ question?.judgeConfig.timeLimit ?? 0 }}
                 </a-descriptions-item>
                 <a-descriptions-item label="内存限制">
-                  {{ question.judgeConfig.memoryLimit ?? 0 }}
+                  {{ question?.judgeConfig.memoryLimit ?? 0 }}
                 </a-descriptions-item>
                 <a-descriptions-item label="堆栈限制">
-                  {{ question.judgeConfig.stackLimit ?? 0 }}
+                  {{ question?.judgeConfig.stackLimit ?? 0 }}
                 </a-descriptions-item>
               </a-descriptions>
               <MdViewer :value="question.content || ''" />
@@ -52,7 +52,8 @@
               placeholder="-编程语言-"
             >
               <a-option>java</a-option>
-              <!--<a-option>cpp</a-option>-->
+              <a-option>c</a-option>
+              <a-option>cpp</a-option>
               <!--<a-option>go</a-option>-->
               <!--<a-option>html</a-option>-->
               <a-option>-待开发-</a-option>
@@ -74,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, withDefaults, defineProps } from "vue";
+import { onMounted, ref, withDefaults, defineProps, watch } from "vue";
 import {
   QuestionControllerService,
   QuestionSubmitAddRequest,
@@ -107,8 +108,57 @@ const loadData = async () => {
 
 const form = ref<QuestionSubmitAddRequest>({
   language: "java",
-  code: "",
+  code:
+    "public class Main {\n" +
+    "    public static void main(String[] args) {\n" +
+    "        int a = Integer.parseInt(args[0]);\n" +
+    "        int b = Integer.parseInt(args[1]);\n" +
+    "        System.out.println((a + b));\n" +
+    "    }\n" +
+    "}",
 });
+
+watch(
+  () => form.value.language,
+  (language) => {
+    if (language === "java") {
+      form.value.code =
+        "public class Main {\n" +
+        "    public static void main(String[] args) {\n" +
+        "        int a = Integer.parseInt(args[0]);\n" +
+        "        int b = Integer.parseInt(args[1]);\n" +
+        "        System.out.println((a + b));\n" +
+        "    }\n" +
+        "}";
+    } else if (language === "c") {
+      form.value.code =
+        "#include <stdio.h>\n" +
+        "int main() {\n" +
+        "    int a, b, sum;\n" +
+        '    printf("请输入两个整数: ");\n' +
+        '    scanf("%d %d", &a, &b);\n' +
+        "    sum = a + b;\n" +
+        '    printf("a + b 的值是: %d\\n", sum);\n' +
+        "    return 0;\n" +
+        "}";
+    } else if (language === "cpp") {
+      form.value.code =
+        "#include <iostream>\n" +
+        "\n" +
+        "int main() {\n" +
+        "    int num1, num2, sum;\n" +
+        '    std::cout << "请输入第一个整数: ";\n' +
+        "    std::cin >> num1;\n" +
+        '    std::cout << "请输入第二个整数: ";\n' +
+        "    std::cin >> num2;\n" +
+        "    sum = num1 + num2;\n" +
+        '    std::cout << "两个整数之和为: " << sum << std::endl;\n' +
+        "    return 0;\n" +
+        "}";
+    }
+  }
+);
+
 /**
  * 提交代码
  */

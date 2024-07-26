@@ -12,7 +12,8 @@
           placeholder="-编程语言-"
         >
           <a-option>java</a-option>
-          <!-- <a-option>cpp</a-option>-->
+          <a-option>c</a-option>
+          <a-option>cpp</a-option>
           <!--<a-option>go</a-option>-->
           <!--<a-option>html</a-option>-->
           <a-option>-待开发-</a-option>
@@ -39,6 +40,7 @@
       <template #judgeInfo="{ record }">
         {{ JSON.stringify(record.judgeInfo) }}
       </template>
+      <!--todo 时间显示有误-->
       <template #createTime="{ record }">
         {{ formatTime(record.createTime) }}
       </template>

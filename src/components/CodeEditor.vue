@@ -44,6 +44,7 @@ watch(
   () => props.language,
   () => {
     if (codeEditor.value) {
+      toRaw(codeEditor?.value).getModel().setValue(props.value);
       moncao.editor.setModelLanguage(
         toRaw(codeEditor.value).getModel(),
         props.language
@@ -66,7 +67,7 @@ onMounted(() => {
     readOnly: false,
     theme: "vs-dark",
     minimap: {
-      enabled: true,
+      enabled: false,
     },
     colorDecorators: true,
   });
