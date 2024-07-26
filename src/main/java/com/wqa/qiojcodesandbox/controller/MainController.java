@@ -1,10 +1,17 @@
 package com.wqa.qiojcodesandbox.controller;
 
 import cn.hutool.crypto.SecureUtil;
-import com.wqa.qiojcodesandbox.JavaDockerCodeSandBox;
-import com.wqa.qiojcodesandbox.JavaNativeCodeSandBox;
+import com.wqa.qiojcodesandbox.CodeSandBox;
+import com.wqa.qiojcodesandbox.c.CCodeSandboxTemplate;
+import com.wqa.qiojcodesandbox.factory.CodeSandBoxFactory;
+import com.wqa.qiojcodesandbox.factory.DockerCodeSandBoxFactory;
+import com.wqa.qiojcodesandbox.factory.NativeCodeSandBoxFactory;
+import com.wqa.qiojcodesandbox.java.JavaCodeSandBoxTemplate;
+import com.wqa.qiojcodesandbox.java.JavaDockerCodeSandBox;
+import com.wqa.qiojcodesandbox.java.JavaNativeCodeSandBox;
 import com.wqa.qiojcodesandbox.model.ExecuteCodeRequest;
 import com.wqa.qiojcodesandbox.model.ExecuteCodeResponse;
+import com.wqa.qiojcodesandbox.model.JudgeInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,12 +26,6 @@ public class MainController {
     public static final String AUTH_REQUEST_HEADER = "auth";
 
     public static final String  AUTH_REQUEST_SECRET = "secretKey-wqa";
-
-    @Resource
-    private JavaDockerCodeSandBox javaDockerCodeSandBox;
-
-    @Resource
-    private JavaNativeCodeSandBox javaNativeCodeSandBox;
 
     @Value("${codeSandBox.type}")
     private String codeSandBoxType;
@@ -47,12 +48,28 @@ public class MainController {
         if (executeCodeRequest == null) {
             throw new RuntimeException("参数为空");
         }
-        ExecuteCodeResponse executeCodeResponse = new ExecuteCodeResponse();
+        ExecuteCodeResponse executeCodeResponse;
+        String language = executeCodeRequest.getLanguage();
+        CodeSandBoxFactory codeSandBoxFactory;
         if ("docker".equals(codeSandBoxType)) {
-            executeCodeResponse =  javaDockerCodeSandBox.executeCode(executeCodeRequest);
+            codeSandBoxFactory = new DockerCodeSandBoxFactory();
         } else if ("native".equals(codeSandBoxType)) {
-            executeCodeResponse =  javaNativeCodeSandBox.executeCode(executeCodeRequest);
+            codeSandBoxFactory = new NativeCodeSandBoxFactory();
+        } else {
+            codeSandBoxFactory = new NativeCodeSandBoxFactory();
         }
+        CodeSandBox codeSandBox;
+        if ("java".equals(language)) {
+            codeSandBox = codeSandBoxFactory.createJavaCodeSandBox();
+        } else if ("c".equals(language)) {
+            codeSandBox = codeSandBoxFactory.createCCodeSandBox();
+        } else if ("cpp".equals(language)) {
+            codeSandBox = codeSandBoxFactory.createCppCodeSandBox();
+        }
+        else {
+            return new ExecuteCodeResponse(null, "暂无此语言的代码沙箱", 3, new JudgeInfo());
+        }
+        executeCodeResponse =  codeSandBox.executeCode(executeCodeRequest);
         return executeCodeResponse;
     }
 }

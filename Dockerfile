@@ -1,5 +1,7 @@
 # 基础镜像
 FROM openjdk:8-jdk-alpine
+# 使用 apk 包管理器安装 GCC 编译器
+RUN apk add --no-cache gcc g++ make
 # 指定工作目录
 WORKDIR /app
 # 将jar包添加到工作目录

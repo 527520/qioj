@@ -1,4 +1,4 @@
-package com.wqa.qiojcodesandbox;
+package com.wqa.qiojcodesandbox.java;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
@@ -6,6 +6,8 @@ import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.dfa.FoundWord;
 import cn.hutool.dfa.WordTree;
+import com.wqa.qiojcodesandbox.CodeSandBox;
+import com.wqa.qiojcodesandbox.constant.CodeBlackList;
 import com.wqa.qiojcodesandbox.model.ExecuteCodeRequest;
 import com.wqa.qiojcodesandbox.model.ExecuteCodeResponse;
 import com.wqa.qiojcodesandbox.model.ExecuteMessage;
@@ -35,8 +37,6 @@ public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
 
     public static final String SECURITY_MANAGER_PATH = "D:\\procedure_wqa\\qioj-code-sandbox\\src\\main\\resources\\security";
 
-    public static final List<String> blackList = Arrays.asList("Files", "Process", "Runtime");
-
     /**
      * 超时时间 5s
      */
@@ -47,7 +47,7 @@ public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
     static {
         // 初始化字典树
         WORD_TREE = new WordTree();
-        WORD_TREE.addWords(blackList);
+        WORD_TREE.addWords(CodeBlackList.JAVA_SENSITIVE_WORD_LIST.getSensitiveWords());
     }
 
     @Override

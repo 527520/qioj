@@ -1,11 +1,15 @@
 package com.wqa.qiojcodesandbox.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 判题信息
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class JudgeInfo {
 
     /**
