@@ -11,6 +11,10 @@ import com.wqa.qioj.judge.codesandbox.CodeSandBox;
 import com.wqa.qioj.judge.codesandbox.model.ExecuteCodeRequest;
 import com.wqa.qioj.judge.codesandbox.model.ExecuteCodeResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
 
 /**
  * 远程代码沙箱（实际调用接口沙箱）
@@ -22,13 +26,10 @@ public class RemoteCodeSandBoxImpl implements CodeSandBox {
 
     public static final String  AUTH_REQUEST_SECRET = "secretKey-wqa";
 
-    @Value("${codesandbox.remote.host}")
-    private String codesandboxHost;
-
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
         System.out.println("远程代码沙箱");
-        String url = "http://" + codesandboxHost + ":8081/executeCode";
+        String url = "http://114.55.101.17:8081/executeCode";
         String respStr = HttpUtil.createPost(url)
                 .header(AUTH_REQUEST_HEADER, SecureUtil.md5(AUTH_REQUEST_SECRET))
                 .body(JSONUtil.toJsonStr(executeCodeRequest))

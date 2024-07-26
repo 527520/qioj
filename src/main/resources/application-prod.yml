@@ -24,5 +24,3 @@ mybatis-plus:
 # 代码沙箱配置
 codesandbox:
   type: remote
-  remote:
-    host: 114.55.101.17

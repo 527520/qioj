@@ -57,5 +57,3 @@ mybatis-plus:
 # 代码沙箱配置
 codesandbox:
   type: remote
-  remote:
-    host: 192.168.241.128
