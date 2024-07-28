@@ -2,9 +2,6 @@
 spring:
   application:
     name: qioj-backend-judge-service
-  # 默认 dev 环境
-  profiles:
-    active: dev
   # 支持 swagger3
   mvc:
     pathmatch:

@@ -8,8 +8,6 @@ import java.io.Serializable;
  * 通用返回类
  *
  * @param <T>
- 
- * @from <a href="https://wqa.icu">编程导航知识星球</a>
  */
 @Data
 public class BaseResponse<T> implements Serializable {

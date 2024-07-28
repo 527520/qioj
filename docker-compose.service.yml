@@ -1,0 +1,66 @@
+version: '3'
+services:
+  qioj-backend-gateway:
+    container_name: qioj-backend-gateway
+    build: # 服务的 Docker 构建文件位置
+      context: ./qioj-backend-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8101:8101"
+    networks:
+      - mynetwork
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+  qioj-backend-user-service:
+    container_name: qioj-backend-user-service
+    build:
+      context: ./qioj-backend-user-service
+      dockerfile: Dockerfile
+    ports:
+      - "8112:8112"
+    networks:
+      - mynetwork
+    depends_on: # 本服务依赖的服务，控制启动先后顺序
+      - qioj-backend-gateway
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+  qioj-backend-question-service:
+    container_name: qioj-backend-question-service
+    build:
+      context: ./qioj-backend-question-service
+      dockerfile: Dockerfile
+    ports:
+      - "8113:8113"
+    networks:
+      - mynetwork
+    depends_on:
+      - qioj-backend-gateway
+      - qioj-backend-user-service
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+  qioj-backend-judge-service:
+    container_name: qioj-backend-judge-service
+    build:
+      context: ./qioj-backend-judge-service
+      dockerfile: Dockerfile
+    ports:
+      - "8114:8114"
+    networks:
+      - mynetwork
+    depends_on:
+      - qioj-backend-gateway
+      - qioj-backend-user-service
+      - qioj-backend-question-service
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+networks:
+  mynetwork:
+    driver: bridge

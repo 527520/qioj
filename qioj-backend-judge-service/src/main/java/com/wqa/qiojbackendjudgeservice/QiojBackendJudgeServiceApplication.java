@@ -18,7 +18,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class QiojBackendJudgeServiceApplication {
 
 	public static void main(String[] args) {
-		InitRabbitmq.doInit();
+//		InitRabbitmq.doInit();
 		SpringApplication.run(QiojBackendJudgeServiceApplication.class, args);
 	}
 

@@ -4,17 +4,25 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 @Slf4j
+@Component
 public class InitRabbitmq {
 
-    public static void doInit() {
+    @Value("${spring.rabbitmq.host:localhost}")
+    private String host;
+
+    @PostConstruct
+    public void init() {
         try {
             ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost("localhost");
+            factory.setHost(host);
             Connection connection = factory.newConnection();
             Channel channel = connection.createChannel();
             String EXCHANGE_NAME = "code_exchange";
@@ -27,11 +35,8 @@ public class InitRabbitmq {
             log.info("消息队列启动成功");
         } catch (IOException | TimeoutException e) {
             log.error("消息队列启动失败");
+            log.error("报错信息：" + e);
             throw new RuntimeException(e);
         }
-    }
-
-    public static void main(String[] args) {
-        doInit();
     }
 }
