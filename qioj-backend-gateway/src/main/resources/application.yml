@@ -37,5 +37,4 @@ knife4j:
       version: swagger2
 gateway:
   excludedUrls:
-    /api/user/get/login,/api/user/logout,/user/register,/api/question/list/page/vo,/api/question/get/vo,/api/user/login
-    ,/user/getLoginUser,/api/user/register,/api/judge/v2/api-docs,/api/user/v2/api-docs,/api/question/v2/api-docs
+    /api/user/get/login,/api/user/logout,/user/register,/api/question/list/page/vo,/api/question/get/vo,/api/user/login,/user/getLoginUser,/api/user/register,/api/judge/v2/api-docs,/api/user/v2/api-docs,/api/question/v2/api-docs

@@ -1,15 +1,11 @@
 package com.wqa.qiojbackendcommon.utils;
 
-import cn.hutool.crypto.asymmetric.RSA;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
@@ -18,7 +14,7 @@ import java.util.Map;
  * 生成和解析JWT的工具
  */
 public class JwtUtils {
-
+    
     // 签名秘钥
     public static final String SECRET = "6fUFp5!2GJXgO3IU4IU@1az6U9#M5h2GE3K$LqzB9Y%chGyqPV_wuQiAn" +
                                         "Popcorn}(K9XLrQMNLd(}>.lq75hKM9m9gS_eAIkZmy>^JAyArsV5WCQ";
