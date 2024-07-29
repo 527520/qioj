@@ -46,15 +46,8 @@ public interface UserFeignClient {
      * @param request
      * @return
      */
-    default User getLoginUser(HttpServletRequest request) {
-        // 先判断是否已登录
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
-        return currentUser;
-    }
+    @GetMapping("/get/loginUser")
+    User getLoginUser(HttpServletRequest request);
 
     /**
      * 是否为管理员

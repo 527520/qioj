@@ -1,11 +1,13 @@
 package com.wqa.qiojbackenduserservice.service.impl;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wqa.qiojbackendcommon.common.ErrorCode;
 import com.wqa.qiojbackendcommon.constant.CommonConstant;
 import com.wqa.qiojbackendcommon.exception.BusinessException;
+import com.wqa.qiojbackendcommon.utils.JwtUtils;
 import com.wqa.qiojbackendcommon.utils.SqlUtils;
 import com.wqa.qiojbackendmodel.model.dto.user.UserQueryRequest;
 import com.wqa.qiojbackendmodel.model.entity.User;
@@ -17,12 +19,17 @@ import com.wqa.qiojbackenduserservice.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import static com.wqa.qiojbackendcommon.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -38,6 +45,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 盐值，混淆密码
      */
     private static final String SALT = "wqa";
+
+    @Resource
+    private RedisTemplate redisTemplate;
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword, String userName) {
@@ -103,8 +113,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
         // 3. 记录用户的登录态
-        request.getSession().setAttribute(USER_LOGIN_STATE, user);
-        return this.getLoginUserVO(user);
+        String token = setToken(user);
+        LoginUserVO loginUserVO = this.getLoginUserVO(user);
+        loginUserVO.setToken(token);
+        return loginUserVO;
+    }
+
+    private String setToken(User user) {
+        // 3.生成JWT Token
+        Map<String, Object> map = new HashMap<>();
+        map.put("userPole", user.getUserRole());
+        map.put("id", user.getId());
+        String token = JwtUtils.getToken(map);
+        // 4.生成全局唯一的Token ID
+        String tokenId = USER_LOGIN_STATE + user.getId();
+        redisTemplate.opsForValue().set(tokenId, token);
+        redisTemplate.expire(tokenId, 7, TimeUnit.DAYS);
+        return token;
     }
 
     /**
@@ -115,15 +140,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public User getLoginUser(HttpServletRequest request) {
-        // 先判断是否已登录
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
+        // 从请求头中取出token
+        String token = request.getHeader("token");
+        if (token == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        // 检验JWT的合法性
+        DecodedJWT decodedJWT = JwtUtils.decoded(token);
+        String id = decodedJWT.getClaim("id").asString();
+        String storedToken = (String) redisTemplate.opsForValue().get(USER_LOGIN_STATE + id);
+        if (!token.equals(storedToken)) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
         // 从数据库查询（追求性能的话可以注释，直接走缓存）
-        long userId = currentUser.getId();
-        currentUser = this.getById(userId);
+        User currentUser = this.getById(id);
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
@@ -138,15 +168,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public User getLoginUserPermitNull(HttpServletRequest request) {
-        // 先判断是否已登录
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
-            return null;
+        // 从请求头中取出token
+        String token = request.getHeader("token");
+        // 检验JWT的合法性
+        DecodedJWT decodedJWT = JwtUtils.decoded(token);
+        String id = decodedJWT.getClaim("id").asString();
+        String storedToken = (String) redisTemplate.opsForValue().get(USER_LOGIN_STATE + id);
+        if (!token.equals(storedToken)) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
         // 从数据库查询（追求性能的话可以注释，直接走缓存）
-        long userId = currentUser.getId();
-        return this.getById(userId);
+        return this.getById(id);
     }
 
     /**
@@ -175,11 +207,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public boolean userLogout(HttpServletRequest request) {
-        if (request.getSession().getAttribute(USER_LOGIN_STATE) == null) {
+        // 从请求头中取出token
+        String token = request.getHeader("token");
+        if (token == null) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
         }
+        DecodedJWT decodedJWT = JwtUtils.decoded(token);
+        String id = decodedJWT.getClaim("id").asString();
         // 移除登录态
-        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        redisTemplate.opsForValue().getOperations().delete(USER_LOGIN_STATE + id);
         return true;
     }
 

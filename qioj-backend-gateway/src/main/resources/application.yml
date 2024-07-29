@@ -35,3 +35,7 @@ knife4j:
       enabled: true
       # 聚合子服务全部swagger2规范文档
       version: swagger2
+gateway:
+  excludedUrls:
+    /api/user/get/login,/api/user/logout,/user/register,/api/question/list/page/vo,/api/question/get/vo,/api/user/login
+    ,/user/getLoginUser,/api/user/register,/api/judge/v2/api-docs,/api/user/v2/api-docs,/api/question/v2/api-docs
