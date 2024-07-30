@@ -66,7 +66,12 @@
           :handle-change="changeCode"
         />
         <a-divider size="0" />
-        <a-button type="primary" style="min-width: 200px" @click="doSubmit">
+        <a-button
+          :disabled="disabled"
+          type="primary"
+          style="min-width: 200px"
+          @click="doSubmit"
+        >
           提交代码
         </a-button>
       </a-col>
@@ -159,10 +164,13 @@ watch(
   }
 );
 
+const disabled = ref(false);
+
 /**
  * 提交代码
  */
 const doSubmit = async () => {
+  disabled.value = true;
   if (!question.value?.id) {
     return;
   }
@@ -175,6 +183,9 @@ const doSubmit = async () => {
   } else {
     message.error("提交失败！！！原因：" + res.message);
   }
+  setTimeout(() => {
+    disabled.value = false;
+  }, 3000);
 };
 
 const changeCode = (value: string) => {

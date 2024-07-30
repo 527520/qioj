@@ -42,6 +42,8 @@ const total = ref(0);
 const searchParams = ref({
   pageSize: 7,
   current: 1,
+  sortField: "createTime",
+  sortOrder: "descend",
 });
 const loadData = async () => {
   const res = await QuestionControllerService.listQuestionByPageUsingPost(
@@ -180,7 +182,7 @@ const formatTime = (timestamp: string) => {
   const date = new Date(timestamp);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+  const day = String(date.getDate() - 1).padStart(2, "0");
   const hours = String(date.getUTCHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
   const seconds = String(date.getSeconds()).padStart(2, "0");

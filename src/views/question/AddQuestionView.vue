@@ -11,9 +11,27 @@
       <a-form-item field="content" tooltip="请输入题目内容" label="题目内容">
         <MdEditor :value="form.content" :handle-change="onContentChange" />
       </a-form-item>
+      <a-form-item
+        field="language"
+        label="该答案使用的编程语言"
+        style="min-width: 240px"
+      >
+        <a-select
+          v-model="form.language"
+          :style="{ width: '220px' }"
+          placeholder="-编程语言-"
+        >
+          <a-option value="">-编程语言-</a-option>
+          <a-option>java</a-option>
+          <a-option>c</a-option>
+          <a-option>cpp</a-option>
+          <!--<a-option>go</a-option>-->
+        </a-select>
+      </a-form-item>
       <a-form-item field="answer" tooltip="请输入题目答案" label="题目答案">
         <MdEditor :value="form.answer" :handle-change="onAnswerChange" />
       </a-form-item>
+
       <!--    <a-form-item field="isRead">-->
       <!--      <a-checkbox v-model="form.isRead"> I have read the manual</a-checkbox>-->
       <!--    </a-form-item>-->
@@ -93,9 +111,18 @@
       </a-form-item>
       <div style="margin-top: 16px" />
       <a-form-item>
-        <a-button html-type="submit" type="primary" @click="doSubmit"
-          >提交
-        </a-button>
+        <a-space size="large">
+          <a-button
+            v-if="form.status !== '3' && form.status !== '99'"
+            html-type="submit"
+            type="outline"
+            @click="saveDraft"
+            >保存为草稿
+          </a-button>
+          <a-button html-type="submit" type="primary" @click="doSubmit"
+            >提交
+          </a-button>
+        </a-space>
       </a-form-item>
     </a-form>
   </div>
@@ -106,14 +133,26 @@ import { onMounted, ref } from "vue";
 import MdEditor from "@/components/MdEditor.vue";
 import { QuestionControllerService } from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
+const router = useRouter();
+
 // 如果页面地址包含update，就是更新页面
 const updatePage = route.path.includes("update");
 
 let form = ref({
-  answer: "",
+  status: "",
+  language: "java",
+  answer:
+    "请将改题目示例答案粘贴到此处，粘贴时请全部替换，验证通过后方可创建题目，**注意**：类名一致为 `Main` ，不可包含包名，示例：\n\n" +
+    "public class Main {\n\n" +
+    "    public static void main(String[] args) {\n" +
+    "        int a = Integer.parseInt(args[0]);\n" +
+    "        int b = Integer.parseInt(args[1]);\n" +
+    "        System.out.println((a + b));\n\n" +
+    "    }\n" +
+    "}",
   content: "",
   judgeCase: [
     {
@@ -143,6 +182,7 @@ const loadData = async () => {
   );
   if (res.code === 0) {
     form.value = res.data as any;
+    form.value.language = "";
     // JSON转js对象
     if (!form.value.judgeCase) {
       form.value.judgeCase = [
@@ -176,7 +216,49 @@ onMounted(() => {
   loadData();
 });
 
+router.beforeEach((to, from, next) => {
+  if (to.path.includes("add")) {
+    resetForm();
+  }
+  next();
+});
+
+const saveDraft = async () => {
+  form.value = {
+    ...form.value,
+    status: "1",
+  };
+  // 区分更新还是创建
+  if (updatePage) {
+    const res = await QuestionControllerService.updateQuestionUsingPost(
+      form.value
+    );
+    if (res.code === 0) {
+      message.success("题目更新成功");
+    } else {
+      message.error("题目更新失败,错误信息：" + res.message);
+    }
+  } else {
+    const res = await QuestionControllerService.addQuestionUsingPost(
+      form.value
+    );
+    if (res.code === 0) {
+      message.success("题目创建成功");
+    } else {
+      message.error("题目创建失败,错误信息：" + res.message);
+    }
+  }
+};
+
 const doSubmit = async () => {
+  if (!form.value.language.trim() || form.value.language.trim() === "") {
+    message.error("请选择编程语言");
+    return;
+  }
+  form.value = {
+    ...form.value,
+    status: "99",
+  };
   console.log(form.value);
   // 区分更新还是创建
   if (updatePage) {
@@ -198,6 +280,42 @@ const doSubmit = async () => {
       message.error("题目创建失败,错误信息：" + res.message);
     }
   }
+  resetForm();
+  setTimeout(() => {
+    router.push({
+      path: `/my/question`,
+    });
+  }, 2000);
+};
+
+const resetForm = () => {
+  form.value = {
+    ...form.value,
+    language: "java",
+    answer:
+      "请将改题目示例答案粘贴到此处，粘贴时请全部替换，验证通过后方可创建题目，**注意**：类名一致为 `Main` ，不可包含包名，示例：\n\n" +
+      "public class Main {\n\n" +
+      "    public static void main(String[] args) {\n" +
+      "        int a = Integer.parseInt(args[0]);\n" +
+      "        int b = Integer.parseInt(args[1]);\n" +
+      "        System.out.println((a + b));\n\n" +
+      "    }\n" +
+      "}",
+    content: "",
+    judgeCase: [
+      {
+        input: "",
+        output: "",
+      },
+    ],
+    judgeConfig: {
+      memoryLimit: 1000,
+      stackLimit: 1000,
+      timeLimit: 1000,
+    },
+    tags: [],
+    title: "",
+  };
 };
 
 /**

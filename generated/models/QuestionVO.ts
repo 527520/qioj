@@ -19,5 +19,6 @@ export type QuestionVO = {
     title?: string;
     updateTime?: string;
     userId?: number;
+    status?: string;
     userVO?: UserVO;
 };

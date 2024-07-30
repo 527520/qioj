@@ -20,9 +20,17 @@
       <template #judgeConfig="{ record }">
         {{ JSON.stringify(record.judgeConfig) }}
       </template>
+      <template #status="{ record }">
+        {{ formatStatus(record.status) }}
+      </template>
       <template #optional="{ record }">
         <a-space>
-          <a-button type="primary" @click="doUpdate(record)">修改</a-button>
+          <a-button
+            :disabled="record.status === '0'"
+            type="primary"
+            @click="doUpdate(record)"
+            >修改</a-button
+          >
           <a-button status="danger" @click="doDelete(record)">删除</a-button>
         </a-space>
       </template>
@@ -46,6 +54,8 @@ const total = ref(0);
 const searchParams = ref({
   pageSize: 7,
   current: 1,
+  sortField: "createTime",
+  sortOrder: "descend",
 });
 const loadData = async () => {
   const res = await QuestionControllerService.listMyQuestionVoByPageUsingPost(
@@ -72,7 +82,7 @@ onMounted(() => {
 });
 
 const scroll = {
-  x: 1600,
+  x: 1700,
 };
 
 const columns = [
@@ -133,6 +143,14 @@ const columns = [
     slotName: "judgeConfig",
   },
   {
+    title: "状态",
+    dataIndex: "status",
+    ellipsis: true,
+    tooltip: true,
+    width: 100,
+    slotName: "status",
+  },
+  {
     title: "操作",
     slotName: "optional",
   },
@@ -161,18 +179,28 @@ const doDelete = async (question: Question) => {
   });
   if (res.code === 0) {
     message.success("删除成功");
-    // todo 更新数据
     await loadData();
   } else {
     message.error("删除失败，错误信息：" + res.message);
   }
 };
 
+const formatStatus = (status: string) => {
+  if (status === "0") {
+    return "答案验证中";
+  } else if (status === "1") {
+    return "草稿";
+  } else if (status === "2") {
+    return "创建失败";
+  }
+  return "已创建";
+};
+
 const formatTime = (timestamp: string) => {
   const date = new Date(timestamp);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+  const day = String(date.getDate() - 1).padStart(2, "0");
   const hours = String(date.getUTCHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
   const seconds = String(date.getSeconds()).padStart(2, "0");

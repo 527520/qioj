@@ -37,6 +37,13 @@
       }"
       @page-change="onPageChange"
     >
+      <template #questionId="{ record }">
+        <a-space>
+          <a-link @click="toQuestionPage(record.questionId)"
+            >{{ record.questionId }}
+          </a-link>
+        </a-space>
+      </template>
       <template #judgeInfo="{ record }">
         {{ JSON.stringify(record.judgeInfo) }}
       </template>
@@ -125,7 +132,8 @@ const columns = [
   {
     title: "题目编号",
     dataIndex: "questionId",
-    width: 190,
+    width: 200,
+    slotName: "questionId",
   },
   {
     title: "提交者id",
@@ -159,9 +167,9 @@ const router = useRouter();
  * 跳转到做题页面
  * @param question
  */
-const toQuestionPage = (question: Question) => {
+const toQuestionPage = (questionId: any) => {
   router.push({
-    path: `/view/question/${question.id}`,
+    path: `/view/question/${questionId}`,
   });
 };
 
@@ -182,7 +190,7 @@ const formatTime = (timestamp: string) => {
   const date = new Date(timestamp);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+  const day = String(date.getDate() - 1).padStart(2, "0");
   const hours = String(date.getUTCHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
   const seconds = String(date.getSeconds()).padStart(2, "0");

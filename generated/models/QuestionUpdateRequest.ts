@@ -14,4 +14,6 @@ export type QuestionUpdateRequest = {
     judgeConfig?: JudgeConfig;
     tags?: Array<string>;
     title?: string;
+    status?: string;
+    language?: string;
 };
