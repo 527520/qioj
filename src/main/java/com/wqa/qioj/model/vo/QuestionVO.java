@@ -87,6 +87,11 @@ public class QuestionVO implements Serializable {
     private Date updateTime;
 
     /**
+     * 状态（0:正在验证答案，1：草稿，2：提交失败，3：已创建）
+     */
+    private String status;
+
+    /**
      * 创建题目人信息
      */
     private UserVO userVO;

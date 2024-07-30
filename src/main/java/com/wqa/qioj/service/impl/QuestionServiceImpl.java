@@ -7,8 +7,10 @@ import com.wqa.qioj.common.ErrorCode;
 import com.wqa.qioj.constant.CommonConstant;
 import com.wqa.qioj.exception.BusinessException;
 import com.wqa.qioj.exception.ThrowUtils;
+import com.wqa.qioj.judge.JudgeService;
 import com.wqa.qioj.model.dto.question.QuestionQueryRequest;
 import com.wqa.qioj.model.entity.*;
+import com.wqa.qioj.model.enums.QuestionStatusEnum;
 import com.wqa.qioj.model.vo.QuestionVO;
 import com.wqa.qioj.model.vo.UserVO;
 import com.wqa.qioj.service.QuestionService;
@@ -18,6 +20,7 @@ import com.wqa.qioj.utils.SqlUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -42,8 +46,13 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
     @Resource
     private QuestionMapper questionMapper;
 
+    @Resource
+    @Lazy
+    private JudgeService judgeService;
+
     /**
      * 校验题目是否合法
+     *
      * @param question
      * @param add
      */
@@ -167,6 +176,12 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
     @Override
     public boolean updateQuestionById(Question question) {
         return this.updateById(question);
+    }
+
+    @Override
+    public Boolean verifyAnswer(long questionId, String language) {
+        Question question = judgeService.doJudge(questionId, language);
+        return question != null && QuestionStatusEnum.VALIDATING_ANSWERS.getValue().equals(question.getStatus());
     }
 }
 

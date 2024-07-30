@@ -111,4 +111,39 @@ public class JudgeServiceImpl implements JudgeService {
         }
         return questionSubmitService.getById(questionSubmitId);
     }
+
+    @Override
+    public Question doJudge(long questionId, String language) {
+        Question question = questionService.getById(questionId);
+        if (question == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "题目不存在");
+        }
+        String code = question.getAnswer();
+        String judgeCaseStr = question.getJudgeCase();
+        List<JudgeCase> judgeCaseList = JSONUtil.toList(judgeCaseStr, JudgeCase.class);
+        // 4) 调用沙箱，获取到执行结果
+        CodeSandBox codeSandBox = CodeSandBoxFactory.newInstance(type);
+        codeSandBox = new CodeSandBoxProxy(codeSandBox);
+        List<String> inputList = judgeCaseList.stream().map(JudgeCase::getInput).collect(Collectors.toList());
+        ExecuteCodeRequest executeCodeRequest = ExecuteCodeRequest.builder()
+                .code(code)
+                .language(language)
+                .inputList(inputList)
+                .build();
+        ExecuteCodeResponse executeCodeResponse = codeSandBox.executeCode(executeCodeRequest);
+        // 5) 根据沙箱执行结果，设置题目的判题状态和信息
+        List<String> outputList = executeCodeResponse.getOutputList();
+        JudgeContext judgeContext = new JudgeContext();
+        judgeContext.setJudgeInfo(executeCodeResponse.getJudgeInfo());
+        judgeContext.setInputList(inputList);
+        judgeContext.setOutputList(outputList);
+        judgeContext.setJudgeCaseList(judgeCaseList);
+        judgeContext.setQuestion(question);
+        QuestionSubmit questionSubmit = new QuestionSubmit();
+        questionSubmit.setLanguage(language);
+        judgeContext.setQuestionSubmit(questionSubmit);
+
+        JudgeInfo judgeInfo = judgeManager.doJudge(judgeContext);
+        return questionService.getById(questionId);
+    }
 }

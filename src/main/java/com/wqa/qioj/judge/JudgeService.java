@@ -1,5 +1,6 @@
 package com.wqa.qioj.judge;
 
+import com.wqa.qioj.model.entity.Question;
 import com.wqa.qioj.model.entity.QuestionSubmit;
 
 /**
@@ -13,4 +14,6 @@ public interface JudgeService {
      * @return
      */
     QuestionSubmit doJudge(long questionSubmitId);
+
+    Question doJudge(long questionId, String language);
 }

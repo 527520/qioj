@@ -54,4 +54,6 @@ public interface QuestionService extends IService<Question> {
     boolean updateSubmitNum(long questionId);
 
     boolean updateQuestionById(Question question);
+
+    Boolean verifyAnswer(long questionId, String language);
 }

@@ -1,5 +1,6 @@
 package com.wqa.qioj.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.wqa.qioj.annotation.AuthCheck;
@@ -16,6 +17,8 @@ import com.wqa.qioj.model.dto.questionsubmit.QuestionSubmitQueryRequest;
 import com.wqa.qioj.model.entity.Question;
 import com.wqa.qioj.model.entity.QuestionSubmit;
 import com.wqa.qioj.model.entity.User;
+import com.wqa.qioj.model.enums.QuestionStatusEnum;
+import com.wqa.qioj.model.enums.QuestionSubmitLanguageEnum;
 import com.wqa.qioj.model.enums.UserRoleEnum;
 import com.wqa.qioj.model.vo.QuestionSubmitVO;
 import com.wqa.qioj.model.vo.QuestionVO;
@@ -29,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 题目接口
@@ -82,9 +86,36 @@ public class QuestionController {
         question.setUserId(loginUser.getId());
         question.setFavourNum(0);
         question.setThumbNum(0);
+        // 如果状态不是 1 则表示要创建题目
+        String language = questionAddRequest.getLanguage();
+        if (!QuestionStatusEnum.DRAFT.getValue().equals(question.getStatus())) {
+            // 编程语言一定要有
+            if (QuestionSubmitLanguageEnum.getEnumByValue(language) == null) {
+                // 没有该编程语言或为空
+                question.setStatus(QuestionStatusEnum.DRAFT.getValue());
+            } else {
+                question.setStatus(QuestionStatusEnum.VALIDATING_ANSWERS.getValue());
+            }
+        }
         boolean result = questionService.save(question);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         long newQuestionId = question.getId();
+        if (QuestionStatusEnum.DRAFT.getValue().equals(question.getStatus())) {
+            return ResultUtils.success(newQuestionId);
+        }
+        // 验证答案是否正确
+        CompletableFuture.runAsync(() -> {
+            boolean verifyResult = questionService.verifyAnswer(newQuestionId, language);
+            Question updateQuestion = new Question();
+            updateQuestion.setId(newQuestionId);
+            if (verifyResult) { // 正确
+                updateQuestion.setStatus(QuestionStatusEnum.CREATED.getValue());
+            } else { // 错误
+                updateQuestion.setStatus(QuestionStatusEnum.CREATION_FAILED.getValue());
+            }
+            boolean updated = questionService.updateQuestionById(updateQuestion);
+            ThrowUtils.throwIf(!updated, ErrorCode.OPERATION_ERROR);
+        });
         return ResultUtils.success(newQuestionId);
     }
 
@@ -122,7 +153,7 @@ public class QuestionController {
     @PostMapping("/update")
     public BaseResponse<Boolean> updateQuestion(@RequestBody QuestionUpdateRequest questionUpdateRequest, HttpServletRequest request) {
         User user = userService.getLoginUser(request);
-        if (questionUpdateRequest == null || questionUpdateRequest.getId() <= 0) {
+        if (user == null || questionUpdateRequest == null || questionUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         Question question = new Question();
@@ -147,6 +178,33 @@ public class QuestionController {
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         if (!UserRoleEnum.ADMIN.getValue().equals(user.getUserRole()) && !oldQuestion.getUserId().equals(user.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限");
+        }
+        if ((QuestionStatusEnum.DRAFT.getValue().equals(oldQuestion.getStatus())
+                || QuestionStatusEnum.CREATION_FAILED.getValue().equals(oldQuestion.getStatus()))
+                && "99".equals(question.getStatus())) {
+            // 原本是草稿，这次要创建，执行判题
+            question.setStatus(QuestionStatusEnum.VALIDATING_ANSWERS.getValue());
+            String language = questionUpdateRequest.getLanguage();
+            if (QuestionSubmitLanguageEnum.getEnumByValue(language) == null) {
+                // 没有该编程语言或为空
+                question.setStatus(QuestionStatusEnum.DRAFT.getValue());
+            } else {
+                // 验证答案是否正确
+                CompletableFuture.runAsync(() -> {
+                    boolean verifyResult = questionService.verifyAnswer(id, language);
+                    Question updateQuestion = new Question();
+                    updateQuestion.setId(id);
+                    if (verifyResult) { // 正确
+                        updateQuestion.setStatus(QuestionStatusEnum.CREATED.getValue());
+                    } else { // 错误
+                        updateQuestion.setStatus(QuestionStatusEnum.CREATION_FAILED.getValue());
+                    }
+                    boolean updated = questionService.updateQuestionById(updateQuestion);
+                    ThrowUtils.throwIf(!updated, ErrorCode.OPERATION_ERROR);
+                });
+            }
+        } else {
+            question.setStatus(oldQuestion.getStatus());
         }
         boolean result = questionService.updateById(question);
         return ResultUtils.success(result);
@@ -207,8 +265,9 @@ public class QuestionController {
         long size = questionQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        Page<Question> questionPage = questionService.page(new Page<>(current, size),
-                questionService.getQueryWrapper(questionQueryRequest));
+        QueryWrapper<Question> queryWrapper = questionService.getQueryWrapper(questionQueryRequest);
+        queryWrapper.eq("status", "3");
+        Page<Question> questionPage = questionService.page(new Page<>(current, size), queryWrapper);
         return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
     }
 
@@ -249,8 +308,9 @@ public class QuestionController {
                                                            HttpServletRequest request) {
         long current = questionQueryRequest.getCurrent();
         long size = questionQueryRequest.getPageSize();
-        Page<Question> questionPage = questionService.page(new Page<>(current, size),
-                questionService.getQueryWrapper(questionQueryRequest));
+        QueryWrapper<Question> queryWrapper = questionService.getQueryWrapper(questionQueryRequest);
+        queryWrapper.eq("status", "3");
+        Page<Question> questionPage = questionService.page(new Page<>(current, size), queryWrapper);
         return ResultUtils.success(questionPage);
     }
 
