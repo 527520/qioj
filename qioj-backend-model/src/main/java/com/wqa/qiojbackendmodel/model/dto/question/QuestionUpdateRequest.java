@@ -45,5 +45,15 @@ public class QuestionUpdateRequest implements Serializable {
      */
     private JudgeConfig judgeConfig;
 
+    /**
+     * 状态（1：草稿，2：提交失败，3：已创建）
+     */
+    private String status;
+
+    /**
+     * 编程语言
+     */
+    private String language;
+
     private static final long serialVersionUID = 1L;
 }

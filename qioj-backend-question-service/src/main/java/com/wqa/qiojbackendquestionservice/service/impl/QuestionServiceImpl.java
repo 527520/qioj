@@ -11,9 +11,11 @@ import com.wqa.qiojbackendcommon.utils.SqlUtils;
 import com.wqa.qiojbackendmodel.model.dto.question.QuestionQueryRequest;
 import com.wqa.qiojbackendmodel.model.entity.Question;
 import com.wqa.qiojbackendmodel.model.entity.User;
+import com.wqa.qiojbackendmodel.model.enums.QuestionStatusEnum;
 import com.wqa.qiojbackendmodel.model.vo.QuestionVO;
 import com.wqa.qiojbackendmodel.model.vo.UserVO;
 import com.wqa.qiojbackendquestionservice.mapper.QuestionMapper;
+import com.wqa.qiojbackendquestionservice.rabbitmq.MyMessageProducer;
 import com.wqa.qiojbackendquestionservice.service.QuestionService;
 import com.wqa.qiojbackendserviceclient.service.UserFeignClient;
 import org.apache.commons.collections4.CollectionUtils;
@@ -42,6 +44,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
 
     @Resource
     private QuestionMapper questionMapper;
+
+    @Resource
+    private MyMessageProducer myMessageProducer;
 
     /**
      * 校验题目是否合法
@@ -163,6 +168,19 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
     @Override
     public boolean updateSubmitNum(long questionId) {
         return questionMapper.updateSubmitNumById(questionId) > 0;
+    }
+
+    @Override
+    public boolean updateQuestionById(Question question) {
+        return this.updateById(question);
+    }
+
+    @Override
+    public Boolean verifyAnswer(long questionId, String language) {
+//        Question question = judgeService.doJudge(questionId, language);
+        myMessageProducer.sendMessage("code_exchange", "my_routingKey2", String.valueOf(questionId) + "," + language);
+        Question question = getById(questionId);
+        return question != null && QuestionStatusEnum.VALIDATING_ANSWERS.getValue().equals(question.getStatus());
     }
 }
 

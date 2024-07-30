@@ -16,15 +16,17 @@ import com.wqa.qiojbackendmodel.model.dto.questionsubmit.QuestionSubmitQueryRequ
 import com.wqa.qiojbackendmodel.model.entity.Question;
 import com.wqa.qiojbackendmodel.model.entity.QuestionSubmit;
 import com.wqa.qiojbackendmodel.model.entity.User;
+import com.wqa.qiojbackendmodel.model.enums.QuestionStatusEnum;
+import com.wqa.qiojbackendmodel.model.enums.QuestionSubmitLanguageEnum;
 import com.wqa.qiojbackendmodel.model.enums.UserRoleEnum;
 import com.wqa.qiojbackendmodel.model.vo.QuestionSubmitVO;
 import com.wqa.qiojbackendmodel.model.vo.QuestionVO;
+import com.wqa.qiojbackendquestionservice.service.QuestionService;
 import com.wqa.qiojbackendquestionservice.service.QuestionSubmitService;
 import com.wqa.qiojbackendserviceclient.service.UserFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
-import com.wqa.qiojbackendquestionservice.service.QuestionService;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -82,9 +84,25 @@ public class QuestionController {
         question.setUserId(loginUser.getId());
         question.setFavourNum(0);
         question.setThumbNum(0);
+        // 如果状态不是 1 则表示要创建题目
+        String language = questionAddRequest.getLanguage();
+        if (!QuestionStatusEnum.DRAFT.getValue().equals(question.getStatus())) {
+            // 编程语言一定要有
+            if (QuestionSubmitLanguageEnum.getEnumByValue(language) == null) {
+                // 没有该编程语言或为空
+                question.setStatus(QuestionStatusEnum.DRAFT.getValue());
+            } else {
+                question.setStatus(QuestionStatusEnum.VALIDATING_ANSWERS.getValue());
+            }
+        }
         boolean result = questionService.save(question);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         long newQuestionId = question.getId();
+        if (QuestionStatusEnum.DRAFT.getValue().equals(question.getStatus())) {
+            return ResultUtils.success(newQuestionId);
+        }
+        boolean verifyResult = questionService.verifyAnswer(newQuestionId, language);
+        ThrowUtils.throwIf(!verifyResult, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(newQuestionId);
     }
 
@@ -106,7 +124,7 @@ public class QuestionController {
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldQuestion.getUserId().equals(user.getId()) && !userFeignClient.isAdmin(request)) {
+        if (!oldQuestion.getUserId().equals(user.getId()) && userFeignClient.isAdmin(userFeignClient.getLoginUser(request))) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = questionService.removeById(id);
@@ -148,6 +166,23 @@ public class QuestionController {
         if (!UserRoleEnum.ADMIN.getValue().equals(user.getUserRole()) && !oldQuestion.getUserId().equals(user.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限");
         }
+        if ((QuestionStatusEnum.DRAFT.getValue().equals(oldQuestion.getStatus())
+                || QuestionStatusEnum.CREATION_FAILED.getValue().equals(oldQuestion.getStatus()))
+                && "99".equals(question.getStatus())) {
+            // 原本是草稿，这次要创建，执行判题
+            question.setStatus(QuestionStatusEnum.VALIDATING_ANSWERS.getValue());
+            String language = questionUpdateRequest.getLanguage();
+            if (QuestionSubmitLanguageEnum.getEnumByValue(language) == null) {
+                // 没有该编程语言或为空
+                question.setStatus(QuestionStatusEnum.DRAFT.getValue());
+            } else {
+                // 验证答案是否正确
+                boolean verifyResult = questionService.verifyAnswer(id, language);
+                ThrowUtils.throwIf(!verifyResult, ErrorCode.OPERATION_ERROR);
+            }
+        } else {
+            question.setStatus(oldQuestion.getStatus());
+        }
         boolean result = questionService.updateById(question);
         return ResultUtils.success(result);
     }
@@ -187,7 +222,7 @@ public class QuestionController {
         }
         User loginUser = userFeignClient.getLoginUser(request);
         // 不是本人或管理员,不能直接获取所有信息
-        if (!question.getUserId().equals(loginUser.getId()) && !userFeignClient.isAdmin(loginUser)) {
+        if (!question.getUserId().equals(loginUser.getId()) && userFeignClient.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         return ResultUtils.success(question);
@@ -290,7 +325,7 @@ public class QuestionController {
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可编辑
-        if (!oldQuestion.getUserId().equals(loginUser.getId()) && !userFeignClient.isAdmin(loginUser)) {
+        if (!oldQuestion.getUserId().equals(loginUser.getId()) && userFeignClient.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean result = questionService.updateById(question);

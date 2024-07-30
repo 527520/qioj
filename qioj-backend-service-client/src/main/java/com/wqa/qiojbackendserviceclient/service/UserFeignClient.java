@@ -1,7 +1,5 @@
 package com.wqa.qiojbackendserviceclient.service;
 
-import com.wqa.qiojbackendcommon.common.ErrorCode;
-import com.wqa.qiojbackendcommon.exception.BusinessException;
 import com.wqa.qiojbackendmodel.model.entity.User;
 import com.wqa.qiojbackendmodel.model.enums.UserRoleEnum;
 import com.wqa.qiojbackendmodel.model.vo.UserVO;
@@ -13,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
-
-import static com.wqa.qiojbackendcommon.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 用户服务
@@ -48,19 +44,6 @@ public interface UserFeignClient {
      */
     @GetMapping("/get/loginUser")
     User getLoginUser(HttpServletRequest request);
-
-    /**
-     * 是否为管理员
-     *
-     * @param request
-     * @return
-     */
-    default boolean isAdmin(HttpServletRequest request) {
-        // 仅管理员可查询
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) userObj;
-        return isAdmin(user);
-    }
 
     /**
      * 是否为管理员

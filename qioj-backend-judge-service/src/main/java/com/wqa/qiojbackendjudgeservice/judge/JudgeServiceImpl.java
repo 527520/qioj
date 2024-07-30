@@ -14,6 +14,7 @@ import com.wqa.qiojbackendmodel.model.dto.question.JudgeCase;
 import com.wqa.qiojbackendmodel.model.entity.Question;
 import com.wqa.qiojbackendmodel.model.entity.QuestionSubmit;
 import com.wqa.qiojbackendmodel.model.enums.JudgeInfoMessageEnum;
+import com.wqa.qiojbackendmodel.model.enums.QuestionStatusEnum;
 import com.wqa.qiojbackendmodel.model.enums.QuestionSubmitStatusEnum;
 import com.wqa.qiojbackendserviceclient.service.QuestionFeignClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -106,5 +107,51 @@ public class JudgeServiceImpl implements JudgeService {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "判题状态更新错误");
         }
         return questionFeignClient.getQuestionSubmitById(questionSubmitId);
+    }
+
+    @Override
+    public Question doJudge(long questionId, String language) {
+        Question question = questionFeignClient.getQuestionById(questionId);
+        if (question == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "题目不存在");
+        }
+        String code = question.getAnswer();
+        String judgeCaseStr = question.getJudgeCase();
+        List<JudgeCase> judgeCaseList = JSONUtil.toList(judgeCaseStr, JudgeCase.class);
+        // 4) 调用沙箱，获取到执行结果
+        CodeSandBox codeSandBox = CodeSandBoxFactory.newInstance(type);
+        codeSandBox = new CodeSandBoxProxy(codeSandBox);
+        List<String> inputList = judgeCaseList.stream().map(JudgeCase::getInput).collect(Collectors.toList());
+        ExecuteCodeRequest executeCodeRequest = ExecuteCodeRequest.builder()
+                .code(code)
+                .language(language)
+                .inputList(inputList)
+                .build();
+        ExecuteCodeResponse executeCodeResponse = codeSandBox.executeCode(executeCodeRequest);
+        // 5) 根据沙箱执行结果，设置题目的判题状态和信息
+        List<String> outputList = executeCodeResponse.getOutputList();
+        JudgeContext judgeContext = new JudgeContext();
+        judgeContext.setJudgeInfo(executeCodeResponse.getJudgeInfo());
+        judgeContext.setInputList(inputList);
+        judgeContext.setOutputList(outputList);
+        judgeContext.setJudgeCaseList(judgeCaseList);
+        judgeContext.setQuestion(question);
+        QuestionSubmit questionSubmit = new QuestionSubmit();
+        questionSubmit.setLanguage(language);
+        judgeContext.setQuestionSubmit(questionSubmit);
+
+        JudgeInfo judgeInfo = judgeManager.doJudge(judgeContext);
+        // 6) 修改数据库中的状态
+        if (JudgeInfoMessageEnum.ACCEPTED.getValue().equals(judgeInfo.getMessage())) {
+            // 表示成功
+            Question question1 = new Question();
+            question1.setId(questionId);
+            question1.setStatus(QuestionStatusEnum.CREATED.getValue());
+            boolean result = questionFeignClient.updateQuestionById(question1);
+            if (!result) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "判题状态更新错误");
+            }
+        }
+        return questionFeignClient.getQuestionById(questionId);
     }
 }

@@ -85,6 +85,11 @@ public class Question implements Serializable {
     private Date updateTime;
 
     /**
+     * 状态（0:正在验证答案，1：草稿，2：提交失败，3：已创建）
+     */
+    private String status;
+
+    /**
      * 是否删除
      */
     @TableLogic
