@@ -65,6 +65,8 @@ public class MainController {
             codeSandBox = codeSandBoxFactory.createCCodeSandBox();
         } else if ("cpp".equals(language)) {
             codeSandBox = codeSandBoxFactory.createCppCodeSandBox();
+        } else if ("python2".equals(language) || "python3".equals(language) || "python".equals(language)) {
+            codeSandBox = codeSandBoxFactory.createPythonCodeSandBox();
         }
         else {
             return new ExecuteCodeResponse(null, "暂无此语言的代码沙箱", 3, new JudgeInfo());

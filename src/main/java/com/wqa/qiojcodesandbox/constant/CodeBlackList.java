@@ -82,6 +82,35 @@ public enum CodeBlackList {
             "atexit", // 添加退出时执行的函数
             "mmap", "munmap", // 直接内存映射操作
             "system" // 执行外部命令
+    )),
+
+    /**
+     * Python 语言相关敏感词
+     */
+    PYTHON_SENSITIVE_WORD_LIST(Arrays.asList(
+            // 文件操作相关
+            "open", "file", "os.path", "shutil", "tempfile", "glob", "fnmatch", "pickle", "shelve", "marshal", "dbm",
+
+            // 网络相关
+            "socket", "ssl", "select", "selectors", "asyncore", "asynchat", "socketserver", "http.client", "urllib", "urllib.request", "urllib.parse", "ftplib", "poplib", "imaplib", "nntplib", "smtplib", "smtpd", "telnetlib", "uuid",
+
+            // 系统命令执行相关
+            "os.system", "os.popen", "subprocess", "commands", "popen2", "popen3", "popen4", "os.spawn", "os.exec", "os.fork",
+
+            // 危险模块
+            "os", "sys", "subprocess", "multiprocessing", "threading", "_thread", "signal", "ctypes", "imp", "importlib", "code", "codeop", "compile", "exec", "eval", "execfile", "input", "__import__",
+
+            // 数据库相关
+            "sqlite3", "mysql", "psycopg2", "pymongo", "redis", "cx_Oracle", "pyodbc", "SQLAlchemy",
+
+            // 加密解密相关
+            "hashlib", "hmac", "secrets", "cryptography", "Crypto", "PyCrypto",
+
+            // 系统信息获取
+            "platform", "sys.version", "sys.version_info", "os.environ", "os.getenv", "os.getcwd", "os.chdir",
+
+            // 其他可能导致安全问题的操作
+            "reload", "breakpoint", "exit", "quit", "help", "license", "credits", "copyright"
     ));
 
     private final List<String> sensitiveWords;

@@ -6,6 +6,8 @@ import com.wqa.qiojcodesandbox.cpp.CppCodeSandboxTemplate;
 import com.wqa.qiojcodesandbox.cpp.CppDockerCodeSandBox;
 import com.wqa.qiojcodesandbox.java.JavaCodeSandBoxTemplate;
 import com.wqa.qiojcodesandbox.java.JavaDockerCodeSandBox;
+import com.wqa.qiojcodesandbox.python.PythonCodeSandboxTemplate;
+import com.wqa.qiojcodesandbox.python.PythonDockerCodeSandBox;
 
 public class DockerCodeSandBoxFactory implements CodeSandBoxFactory{
     @Override
@@ -21,5 +23,10 @@ public class DockerCodeSandBoxFactory implements CodeSandBoxFactory{
     @Override
     public CppCodeSandboxTemplate createCppCodeSandBox() {
         return new CppDockerCodeSandBox();
+    }
+
+    @Override
+    public PythonCodeSandboxTemplate createPythonCodeSandBox() {
+        return new PythonDockerCodeSandBox();
     }
 }
